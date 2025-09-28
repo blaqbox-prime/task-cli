@@ -1,4 +1,4 @@
-````markdown
+```markdown
 # ⚡ task-cli
 
 A simple, fast, and persistent command-line task manager built in Java. Manage your to-do list directly from your terminal with a clear, intuitive syntax.
