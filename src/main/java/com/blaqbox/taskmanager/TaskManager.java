@@ -11,9 +11,9 @@ import java.util.List;
 
 public class TaskManager {
 
-    private static Gson gson = new Gson();
+    private static final Gson gson = new Gson();
     private List<Task> tasks;
-    private static String filePath = "tasks.json";
+    private static final String filePath = "tasks.json";
     private static TaskManager instance = null;
 
 
@@ -37,7 +37,7 @@ public class TaskManager {
     }
 
     static ArrayList<Task> loadFromJsonFile(String filePath) {
-        File file = new File(TaskManager.filePath);
+        File file = new File(filePath);
         try {
             FileReader reader = new FileReader(file);
 
@@ -47,9 +47,9 @@ public class TaskManager {
         }catch (FileNotFoundException e){
             try {
                 System.out.println("Persistence file not found...");
-                Thread.sleep(1000);
+                Thread.sleep(500);
                 System.out.println("Attempting to create new file: tasks.json....");
-                Thread.sleep(1000);
+                Thread.sleep(500);
 
 //                Create new file
                 boolean isCreated = file.createNewFile();
@@ -77,18 +77,13 @@ public class TaskManager {
         return new ArrayList<>();
     }
 
-    private static Task JsonToTask(JsonElement jsonTask){
-        JsonObject jsonObj = jsonTask.getAsJsonObject();
-        return gson.fromJson(jsonObj, Task.class);
-    }
-
     public List<Task> getTasks() {
         return tasks;
     }
 
     public boolean addTask(String description){
-        if(description.isEmpty() || description.isBlank()){
-            Task task = new Task(description);
+        if(!description.isEmpty() & !description.isBlank()){
+            tasks.add(new Task(description));
             return true;
         }
         System.out.println("Description cannot be empty or Blank (only white space)");
@@ -102,7 +97,7 @@ public class TaskManager {
 
         boolean isFound = false;
         for (Task task: tasks){
-            if (task.getId() == id){
+            if (task.getId() == id & (!description.isEmpty() & !description.isBlank()) ){
                 isFound = true;
                 task.setDescription(description);
             }
@@ -112,14 +107,7 @@ public class TaskManager {
     }
 
     public boolean delete(int id) {
-        boolean isRemoved = false;
-        for (Task task: tasks){
-            if(task.getId() == id){
-                tasks.remove(task);
-                isRemoved = true;
-            }
-        }
-        return isRemoved;
+        return id >= 0 && tasks.removeIf(task -> task.getId() == id);
     }
 
     public boolean mark(int id, Task.Status status) {
@@ -133,13 +121,19 @@ public class TaskManager {
         return isMarked;
     }
 
-    private boolean save() throws FileNotFoundException {
-        try (FileWriter fileWriter = new FileWriter("tasks.json")) {
+    public boolean save(String filepath) {
+        try (FileWriter fileWriter = new FileWriter(filepath)) {
             fileWriter.write(gson.toJson(instance.getTasks()));
             return true;
         } catch (IOException e) {
             System.out.println(e.getMessage());
             return false;
         }
+    }
+
+    public Task getTaskById(int id) {
+        return tasks.stream()
+                .filter(task -> task.getId() == id)
+                .findFirst().orElse(null);
     }
 }

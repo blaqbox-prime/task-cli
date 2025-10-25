@@ -4,33 +4,30 @@ import com.google.gson.annotations.SerializedName;
 
 public class Task {
 
-    static private int taskCount = 0;
+    static private int latestTaskID = 0;
 
     private int id;
     private String description;
     private Status status;
 
-    public Task() {
-    }
-
     public Task(String description, Status status) {
-        this.id = ++taskCount;
+        this.id = ++latestTaskID;
         this.description = description;
         this.status = status;
     }
 
     public Task(String description) {
-        this.id = ++taskCount;
+        this.id = ++latestTaskID;
         this.description = description;
         this.status = Status.TODO;
     }
 
-    public static int getTaskCount() {
-        return taskCount;
+    public static int getLatestTaskID() {
+        return latestTaskID;
     }
 
-    public static void setTaskCount(int taskCount) {
-        Task.taskCount = taskCount;
+    public static void setLatestTaskID(int latestTaskID) {
+        Task.latestTaskID = latestTaskID;
     }
 
     public int getId() {
