@@ -26,6 +26,7 @@ public class TaskCli implements Runnable {
 
     @Override
     public void run() {
+
 //        Default action if no command is given
         System.out.println("Use 'task-cli help' to see available commands");
     }

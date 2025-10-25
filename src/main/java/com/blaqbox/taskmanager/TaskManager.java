@@ -1,6 +1,7 @@
 package com.blaqbox.taskmanager;
 
 import com.blaqbox.taskmanager.Entities.Task;
+import com.blaqbox.taskmanager.Enums.Filter;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
@@ -13,7 +14,7 @@ public class TaskManager {
 
     private static final Gson gson = new Gson();
     private List<Task> tasks;
-    private static final String filePath = "tasks.json";
+    private static final String filePath = "./tasks.json";
     private static TaskManager instance = null;
 
 
@@ -42,7 +43,9 @@ public class TaskManager {
             FileReader reader = new FileReader(file);
 
             Type listType = new TypeToken<ArrayList<Task>>(){}.getType();
+            System.out.println("File being loaded");
             return gson.fromJson(reader, listType);
+
 
         }catch (FileNotFoundException e){
             try {
@@ -84,6 +87,7 @@ public class TaskManager {
     public boolean addTask(String description){
         if(!description.isEmpty() & !description.isBlank()){
             tasks.add(new Task(description));
+            save(filePath);
             return true;
         }
         System.out.println("Description cannot be empty or Blank (only white space)");
@@ -92,6 +96,7 @@ public class TaskManager {
 
     public boolean update(int id, String description) {
         if(tasks.isEmpty()){
+            save(filePath);
             return false;
         }
 
@@ -100,6 +105,7 @@ public class TaskManager {
             if (task.getId() == id & (!description.isEmpty() & !description.isBlank()) ){
                 isFound = true;
                 task.setDescription(description);
+                save(filePath);
             }
         }
 
@@ -107,7 +113,12 @@ public class TaskManager {
     }
 
     public boolean delete(int id) {
-        return id >= 0 && tasks.removeIf(task -> task.getId() == id);
+        if(id < 0) return false;
+        boolean removed = tasks.removeIf(task -> task.getId() == id);
+        if(removed){
+            save(filePath);
+        }
+        return removed;
     }
 
     public boolean mark(int id, Task.Status status) {
@@ -116,6 +127,7 @@ public class TaskManager {
             if(task.getId() == id){
                 task.setStatus(status);
                 isMarked = true;
+                save(filePath);
             }
         }
         return isMarked;
@@ -135,5 +147,12 @@ public class TaskManager {
         return tasks.stream()
                 .filter(task -> task.getId() == id)
                 .findFirst().orElse(null);
+    }
+
+    public List<Task> getTasksByStatus(Filter status) {
+        if(status == null){
+            return tasks;
+        }
+        return tasks.stream().filter(task -> task.getStatus().toString().equals(status.toString())).toList();
     }
 }
